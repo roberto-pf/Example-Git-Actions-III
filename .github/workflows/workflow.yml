@@ -20,10 +20,40 @@ jobs:
           if: steps.branch-name.outputs.is_default == 'true'
           run: |
             echo "Running on default: ${{ steps.branch-name.outputs.current_branch }}"
-          # Outputs: "Running on default: main".
 
-        - name: Running on a pull request branch.
-          if: steps.branch-name.outputs.is_default == 'false'
+        - id: get-id
           run: |
-            echo "Running on pr: ${{ steps.branch-name.outputs.current_branch }}"
-          # Outputs: "Running on pr: feature/test".
+            id=$(echo ${{ steps.branch-name.outputs.current_branch }} | cut -d] -f1 | cut -d[ -f2)
+            echo "::set-output name=id::$id"
+        - run: echo "${{steps.get-id.outputs.id}}"
+        
+        
+        #Tarea extrae a la variable version, la version existente en el pom.xml
+        - name: Extract Maven project version
+          run: echo ::set-output name=version::$(mvn -q -Dexec.executable=echo -Dexec.args='${project.version}' --non-recursive exec:exec)
+          #identificador asignado a la tarea
+          id: project_version
+          #Tarea que hace un echo de la variable creada en la tarea anterior
+        - name: Show extracted  Maven project version
+          run: echo "Version is ${{ steps.project_version.outputs.version }}"
+
+        - id: get-id-version
+          run: |
+            id=$(echo ${{ steps.branch-name.outputs.current_branch }} | cut -d- -f1)
+            echo "::set-output name=id::$id"
+        - run: echo "${{steps.get-id.outputs.id}}"              
+              
+        - name: set version pom
+          working-directory: ./example3-gitactions
+          run: mvn -B versions:set -DnewVersion=${{ steps.get-id-version.outputs.id }}_${{ steps.get-id.outputs.id }}-SNAPSHOT -DgenerateBackupPoms=false
+          
+        - name: mvn package
+          run: mvn -B package --file example3-gitactions/pom.xml
+          
+        - name: Commit new version
+          run: |
+            git config --global user.name 'Roberto'
+            git config --global user.email 'roberto-pf@github.com'
+            git add .
+            git commit -am "Automated report"
+            git push
