@@ -68,7 +68,7 @@ jobs:
               
         - name: set version pom
           working-directory: ./example3-gitactions
-          run: mvn -B versions:set -DnewVersion=${{ needs.extract-preffix-name-pom-version.outputs.preffix }}-${{ needs.extract-suffix-name-branch.outputs.suffix }}-SNAPSHOT -DgenerateBackupPoms=false
+          run: mvn -B versions:set -DnewVersion=${{ needs.extract-preffix-name-pom-version.outputs.preffix_name }}-${{ needs.extract-suffix-name-branch.outputs.suffix_name }}-SNAPSHOT -DgenerateBackupPoms=false
           
         - name: mvn package
           run: mvn -B package --file example3-gitactions/pom.xml
