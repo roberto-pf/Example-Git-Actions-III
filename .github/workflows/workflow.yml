@@ -6,17 +6,14 @@ on:
     branches:
       - main
 jobs:
-  compile-mvn:
+  extract-suffix-name-branch:
       runs-on: ubuntu-latest
+      #Lista de variables de salida del job
+      outputs:
+        suffix_name: ${{ steps.get-id.outputs.id }}
       steps:
         # Checkout repository
-        - uses: actions/checkout@v2          
-        
-        # Instalamos jdk 11
-        - name: Set up JDK 1.11
-          uses: actions/setup-java@v1
-          with:
-            java-version: 1.11
+        - uses: actions/checkout@v2         
           
         # Utilizamos action que recupera los nombres de las ramas las ramas 
         - name: Get branch name
@@ -34,7 +31,15 @@ jobs:
           run: |
             id=$(echo ${{ steps.branch-name.outputs.current_branch }} | cut -d] -f1 | cut -d[ -f2)
             echo "::set-output name=id::$id"
-        - run: echo "SuffixName of branch is ${{steps.get-id.outputs.id}}"
+        
+  extract-preffix-name-pom-version:
+      runs-on: ubuntu-latest
+      #Lista de variables de salida del job
+      outputs:
+        preffix_name: ${{ steps.get-id.outputs.id }}
+      steps:
+        # Checkout repository
+        - uses: actions/checkout@v2        
                 
         #Tarea extrae a la variable version, la version existente en el pom.xml
         - name: Extract Maven project version
@@ -43,15 +48,27 @@ jobs:
           id: project_version
         - run: echo "Maven project version is ${{ steps.project_version.outputs.version }}"
 
-        - id: get-id-version
+        - id: get-id
           run: |
             id=$(echo ${{ steps.project_version.outputs.version }} | cut -d- -f1)
-            echo "::set-output name=id::$id"
-        - run: echo "PreffixName of branch is ${{steps.get-id-version.outputs.id}}"              
+            echo "::set-output name=id::$id"       
+        
+  rename-pom-version-and-commit:
+      needs: [extract-preffix-name-pom-version, extract-suffix-name-branch]
+      runs-on: ubuntu-latest
+      steps:
+        # Checkout repository
+        - uses: actions/checkout@v2          
+        
+        # Instalamos jdk 11
+        - name: Set up JDK 1.11
+          uses: actions/setup-java@v1
+          with:
+            java-version: 1.11             
               
         - name: set version pom
           working-directory: ./example3-gitactions
-          run: mvn -B versions:set -DnewVersion=${{ steps.get-id-version.outputs.id }}-${{ steps.get-id.outputs.id }}-SNAPSHOT -DgenerateBackupPoms=false
+          run: mvn -B versions:set -DnewVersion=${{ needs.extract-preffix-name-pom-version.outputs.preffix }}-${{ needs.extract-suffix-name-branch.outputs.suffix }}-SNAPSHOT -DgenerateBackupPoms=false
           
         - name: mvn package
           run: mvn -B package --file example3-gitactions/pom.xml
