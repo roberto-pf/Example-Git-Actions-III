@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>es.com.disastercode.gitactions</groupId>
 	<artifactId>example3-gitactions</artifactId>
-	<version>prueba-1001</version>
+	<version>prueba_prueba-1001-SNAPSHOT</version>
 	<packaging>jar</packaging>
 	<name>example3-gitactions</name>
 	<description>Demo project for Spring Boot</description>
