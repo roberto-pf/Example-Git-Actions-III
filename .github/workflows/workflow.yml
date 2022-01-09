@@ -27,7 +27,7 @@ jobs:
         - run: echo "${{steps.get-id.outputs.id}}"
         
         - name: set version pom
-          working-directory: ./Example-Git-Actions-III/example3-gitactions
+          working-directory: ./example3-gitactions
           run: mvn -B versions:set -DnewVersion=${{ steps.get-id.outputs.id }} -DgenerateBackupPoms=false
           
         - name: mvn package
