@@ -38,13 +38,13 @@ jobs:
 
         - id: get-id-version
           run: |
-            id=$(echo ${{ steps.branch-name.outputs.current_branch }} | cut -d-SNAPSHOT -f1)
+            id=$(echo ${{ steps.branch-name.outputs.current_branch }} | cut -d- -f1)
             echo "::set-output name=id::$id"
         - run: echo "${{steps.get-id.outputs.id}}"              
               
         - name: set version pom
           working-directory: ./example3-gitactions
-          run: mvn -B versions:set -DnewVersion=${{ steps.get-id-version.outputs.id }}-${{ steps.get-id.outputs.id }}-SNAPSHOT -DgenerateBackupPoms=false
+          run: mvn -B versions:set -DnewVersion=${{ steps.get-id-version.outputs.id }}_${{ steps.get-id.outputs.id }}-SNAPSHOT -DgenerateBackupPoms=false
           
         - name: mvn package
           run: mvn -B package --file example3-gitactions/pom.xml
