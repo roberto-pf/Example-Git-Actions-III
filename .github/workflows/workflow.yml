@@ -1,5 +1,6 @@
 name: Compile with other repo dependency
-on: [ push ]
+on:
+  create
 jobs:
   compile-mvn:
       runs-on: ubuntu-latest
