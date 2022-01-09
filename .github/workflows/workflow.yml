@@ -1,6 +1,8 @@
-name: Compile with other repo dependency
+name: On create branch - Rename version pom.xml
 on:
-  create
+  create:
+    branches:
+      - main
 jobs:
   compile-mvn:
       runs-on: ubuntu-latest
@@ -35,8 +37,7 @@ jobs:
           #identificador asignado a la tarea
           id: project_version
           #Tarea que hace un echo de la variable creada en la tarea anterior
-        - name: Show extracted  Maven project version
-          run: echo "Version is ${{ steps.project_version.outputs.version }}"
+        - run: echo "Maven project version is ${{ steps.project_version.outputs.version }}"
 
         - id: get-id-version
           run: |
