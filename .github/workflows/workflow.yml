@@ -19,10 +19,15 @@ jobs:
           if: steps.branch-name.outputs.is_default == 'true'
           run: |
             echo "Running on default: ${{ steps.branch-name.outputs.current_branch }}"
-          # Outputs: "Running on default: main".
 
         - id: get-id
           run: |
-            id=$(echo ${{ steps.branch-name.outputs.current_branch }} | cut -d] -f1 | cut -d- -f2)
+            id=$(echo ${{ steps.branch-name.outputs.current_branch }} | cut -d] -f1 | cut -d[ -f2)
             echo "::set-output name=id::$id"
         - run: echo "${{steps.get-id.outputs.id}}"
+        
+        - name: set version pom
+          run: mvn -B versions:set -DnewVersion=${{ steps.get-id.outputs.id }} -DgenerateBackupPoms=false
+          
+        - name: mvn package
+          run: mvn -B package
