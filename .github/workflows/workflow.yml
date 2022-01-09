@@ -30,6 +30,7 @@ jobs:
         
         #Tarea extrae a la variable version, la version existente en el pom.xml
         - name: Extract Maven project version
+          working-directory: ./example3-gitactions
           run: echo ::set-output name=version::$(mvn -q -Dexec.executable=echo -Dexec.args='${project.version}' --non-recursive exec:exec)
           #identificador asignado a la tarea
           id: project_version
