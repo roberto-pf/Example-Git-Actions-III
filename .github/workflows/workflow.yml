@@ -1,9 +1,8 @@
 name: Compile with other repo dependency
-on: [push]
-env:
-  DEPENDENCY_REPOSITORY: "roberto-pf/Example-Git-Actions"
-  DEPENDENCY_PATH: "Example-Git-Actions"
-  DEPENDENCY_REF: "example-2"
+on:
+  push:
+    branches:
+      - main
 jobs:
   compile-mvn:
       runs-on: ubuntu-latest
@@ -14,18 +13,19 @@ jobs:
           uses: actions/setup-java@v1
           with:
             java-version: 1.11
+            
+        - name: Get branch name
+          id: branch-name
+          uses: tj-actions/branch-names@v5.1
           
-        - name: Checkout cross repo
-          uses: actions/checkout@v2
-          with:
-            repository:  ${{env.DEPENDENCY_REPOSITORY}}
-            path:  ${{env.DEPENDENCY_PATH}}
-            ref:  ${{env.DEPENDENCY_REF}}             
-            
-        - name: Build with Maven repo roberto-pf/Example-Git-Actions project example2-gitactions-model
-          working-directory: ./Example-Git-Actions/example2-gitactions-model
+        - name: Running on the default branch.
+          if: steps.branch-name.outputs.is_default == 'true'
           run: |
-            mvn -B install --file pom.xml
-            
-        - name: Build with Maven repo roberto-pf/Example-Git-Actions-II project example2-gitactions
-          run: mvn -B package --file example2-gitactions/pom.xml
+            echo "Running on default: ${{ steps.branch-name.outputs.current_branch }}"
+          # Outputs: "Running on default: main".
+
+        - name: Running on a pull request branch.
+          if: steps.branch-name.outputs.is_default == 'false'
+          run: |
+            echo "Running on pr: ${{ steps.branch-name.outputs.current_branch }}"
+          # Outputs: "Running on pr: feature/test".
